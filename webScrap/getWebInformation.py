@@ -14,7 +14,6 @@ def webForWiki(plantName):
     needSite = "easyatm.com.tw"
     urlList = getNeedURL(plantName, needSite)
     for theurl in urlList:
-        print(theurl)
         if theurl.find(needSite) > -1:
             url = theurl
             break
@@ -39,7 +38,6 @@ def webForWikiAgain(plantName, keywords = []):
     needSite = "easyatm.com.tw"
     urlList = getNeedURL(plantName, needSite)
     for theurl in urlList:
-        print(theurl)
         if theurl.find(needSite) > -1:
             url = theurl
             break
@@ -96,6 +94,7 @@ def webForPH():
         part_word.extend(part.find_all("td"))
     for part in part_word:
         part = str(part)
+        part = "".join(part.split())
         part = delWord(part)
         returnList.append(part)
     returnList[-2] = "Zinnia"
@@ -116,10 +115,10 @@ def webForKplant(plantName):
     needSite = "kplant.biodiv.tw"
     urlList = getNeedURL(plantName, needSite)
     for theurl in urlList:
-        print(theurl)
         if theurl.find(needSite) > -1:
             url = theurl
             break
+
     try:
         response = rq.get(url) # 用 requests 的 get 方法把網頁抓下來
         response.encoding = response.apparent_encoding
@@ -139,6 +138,7 @@ def webForKplant(plantName):
     check = False
     for part in part_word:
         part = str(part)
+        part = "".join(part.split())
         part = part.replace("\n", "")
         if not part.find(titleString) == -1:
             check = True
@@ -189,8 +189,15 @@ def getInformationFromWeb(url, keywords = []):
     return_part_word = []
     for part in part_word:
         part = str(part)
-        for keyword in keywords:
-            checkText = part.find(keyword)
+        part = "".join(part.split())
+        if isinstance(keywords, list):
+            for keyword in keywords:
+                checkText = part.find(keyword)
+                if not checkText == -1:
+                    return_part_word.append(part)
+                    break
+        else:
+            checkText = part.find(keywords)
             if not checkText == -1:
                 return_part_word.append(part)
                 break
@@ -198,10 +205,10 @@ def getInformationFromWeb(url, keywords = []):
 
 
 def getNeedURL(plantName, searchParam = ""):
-    if searchParam == "":
-        query = plantName
-    else:
+    if searchParam:
         query = plantName + " " + searchParam
+    else:
+        query = plantName
     print(query)
     #searchList = search(query, tld="co.in", lang="zh-TW", stop = 10, pause=2) 
     searchList = search(query, lang="zh-TW", stop = 5, pause=2) 

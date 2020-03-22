@@ -46,9 +46,8 @@ def findKeywords(keywordType, answerList):
                 break
     else:
         print("Error")
-    if answer == "":
+    if not answer:
         print("Not Found！")
-        return answer
     return answer
 
 
@@ -71,44 +70,55 @@ def wordStartToEnd(locate = 0, textLen = 0, period = 20):
     return textStart, textEnd
 
 
-def findWord(text_list = [], find_word = [], except_word = [], period = 20, priority_word = ""):
+def findWord(text_list = [], find_word = [], except_word = [], period = 20, priority_word = []):
     answerList = []
     for text in text_list: # 找剛截下來的字串陣列
         text = str(text)
         text = text.replace("~", "-") # 統一區間的文字
         text = text.replace("～", "-")
         for word in find_word:   # 關鍵字陣列
-            checkAnswer = text.find(word)
-            if not(checkAnswer == -1):  # 不是-1表示有找到
-                textStart, textEnd = wordStartToEnd(locate = checkAnswer, textLen = len(text), period = period)
-                # 選取要截取的段落
-                newText = text[textStart:textEnd]
-                for exceptWord in except_word: # 表示有不想截取的內容
-                    checkAnswerAgain = newText.find(exceptWord)
-                    if not(checkAnswerAgain == -1): #有找到不想截取的內容
-                        newText = ""
-                        break
-                #print(text[textStart:textEnd])
-                if not(newText == "" ):
-                    answerList.append(newText)
-                    except_word.append(newText[7:13]) # 除去重覆的字串
+            while True:
+                checkAnswer = text.find(word)
+                if not(checkAnswer == -1):  # 不是-1表示有找到
+                    textStart, textEnd = wordStartToEnd(locate = checkAnswer, textLen = len(text), period = period)
+                    # 選取要截取的段落
+                    newText = text[textStart:textEnd]
+                    for exceptWord in except_word: # 表示有不想截取的內容
+                        checkAnswerAgain = newText.find(exceptWord)
+                        if not(checkAnswerAgain == -1): #有找到不想截取的內容
+                            newText = ""
+                            break
+                    #print(text[textStart:textEnd])
+                    if not newText:
+                        answerList.append(newText)
+                        p_min = period / 2 - 4
+                        p_max = period / 2 + 4
+                        except_word.append(newText[p_min : p_max]) # 除去重覆的字串
+                    text = text[textEnd:]
+                else:
+                    break
 
     for index, answer in enumerate(answerList):
-        if answer.find(priority_word) > -1:
-            temp = answerList[0]
-            answerList[0] = answer
-            answerList[index] = temp
+        check = False
+        for p in priority_word:
+            if answer.find(p) > -1:
+                temp = answerList[0]
+                answerList[0] = answer
+                answerList[index] = temp
+                check = True
+                break
+        if check:
             break
     return answerList
 
 
-def callFindWord(text_list = [], find_word = [], except_word = [], period = 20, priority_word = ""):
+def callFindWord(text_list = [], find_word = [], except_word = [], period = 20, priority_word = []):
     answerList = findWord(text_list, find_word, except_word, priority_word = priority_word)
     answer = findKeywords(keywordType = find_word[0], answerList = answerList)
     return answer 
 
 
-def loopForCallFindWord(plantName, search_Param, find_word = [], except_word = [], period = 20):
+def loopForCallFindWord(plantName, search_Param, find_word = [], except_word = [], period = 20, priority_word = []):
     part_word = []
     getInformation = ""
     #拿到google搜尋結果
@@ -116,9 +126,9 @@ def loopForCallFindWord(plantName, search_Param, find_word = [], except_word = [
     for theURL in urlList:
         #檢查網站內是否有要查找的關鍵字
         part_word = myWeb.getInformationFromWeb(theURL, find_word)
-        if not part_word is None:
-            returnResult = callFindWord(text_list = part_word, find_word = find_word, except_word = except_word, period = period)
-            if not returnResult == "":
+        if part_word:
+            returnResult = callFindWord(text_list = part_word, find_word = find_word, except_word = except_word, period = period, priority_word = priority_word)
+            if returnResult:
                 #表示有找到結果
                 getInformation = returnResult
                 break
@@ -126,7 +136,7 @@ def loopForCallFindWord(plantName, search_Param, find_word = [], except_word = [
 
 
 def getPlantOtherName(plantName):
-    titleStrings = ["中文名稱", "英文名稱", "學名", "科名", "別名", "只是防止出錯用的"]
+    titleStrings = myString.getTitleStrings()
     titleDictionary = [ChineseName, EnglishName, ScientificName, Order, OtherName]
     myDictionary = {ChineseName : [],
                     EnglishName : [],
@@ -147,7 +157,7 @@ def getPlantOtherName(plantName):
     theUrl = ""
     if webTextList is None:
         theUrl = myWeb.getNeedURL(plantName, "別名")
-
+        webTextList = myWeb.getInformationFromWeb(plantName, ["別名"])
 
     for scraping in webTextList:
         leftBracket = ["『","（"]
@@ -167,9 +177,17 @@ def getPlantOtherName(plantName):
         for splitString in splitStrings:
             if splitString == "":
                 continue
-            if splitString == titleStrings[index + 1]:
-                index = index + 1
-                continue
+            if isinstance(titleStrings[index + 1],list):
+                oldIndex = index
+                for theTitle in titleStrings[index + 1]:
+                    if splitString == theTitle:
+                        index = index + 1
+                if oldIndex < index:
+                    continue
+            else:
+                if splitString == titleStrings[index + 1]:
+                    index = index + 1
+                    continue
             myDictionary[titleDictionary[index]].append(splitString)
     myDictionary[ChineseName] = plantName
     
@@ -186,7 +204,7 @@ def getPlantOtherName(plantName):
     updateList = []
     #用以檢查是否為()內的內容
     check = True
-    #去除別名的()
+    #去除()與其他
     for i, item in enumerate(myDictionary[ScientificName]):
         if not check:
             check = True
@@ -196,6 +214,8 @@ def getPlantOtherName(plantName):
             item = item.replace(")", "")
             updateList.append(item)
 
+        if item.encode("UTF-8").isalpha():
+            updateList.append(item)
         '''
         else:
             updateList.append(item[:-1])
@@ -293,10 +313,10 @@ def getTempuratureInformation(plantDictionary):
     returnList[tempuratureTitle] = myDB.getTempurature(plantDictionary[ChineseName])
     tempuratureText = ["溫度", "適溫", "°C", "℃", "攝氏"] #統一第一個字為標題
     tempuratureExceptText = ["病"]
-    tempuratureTextofPriority = "生長適溫"
+    tempuratureTextofPriority = ["生長適溫","合適溫度", "適宜溫度", "合適的溫度", "適宜的溫度"]
 
     #從植物百科截取需要的溫度資訊
-    if returnList[tempuratureTitle] == "":
+    if not returnList[tempuratureTitle]:
         part_word = myWeb.webForWiki(plantName)
         returnResult = callFindWord(text_list = part_word, find_word = tempuratureText, except_word = tempuratureExceptText, period = 20, priority_word = tempuratureTextofPriority)
         if not returnResult == "":
@@ -304,39 +324,44 @@ def getTempuratureInformation(plantDictionary):
             myDB.setTempurature(plantDictionary[ChineseName], returnResult)
     
     #再一次從植物百科截取需要的溫度資訊
-    if returnList[tempuratureTitle] == "":
+    if not returnList[tempuratureTitle]:
         part_word = myWeb.webForWikiAgain(plantName, tempuratureText)
         returnResult = callFindWord(text_list = part_word, find_word = tempuratureText, except_word = tempuratureExceptText, period = 20, priority_word = tempuratureTextofPriority)
         if returnResult == "":
-            print("Error")
+            print("esayatm Not Found")
         else:
             returnList[tempuratureTitle] = returnResult
             myDB.setTempurature(plantDictionary[ChineseName], returnResult)
 
+    #測試！從外部網站截取需要的溫度資訊
+    if not returnList[tempuratureTitle]:
+        temp = loopForCallFindWord(plantName = plantDictionary[ChineseName], search_Param = "溫度", find_word = tempuratureText, except_word = tempuratureExceptText, period = 40, priority_word = tempuratureTextofPriority)
+        '''
+        if temp:
+            for item in plantDictionary[OtherName]:
+                # 還在測試階段
+                temp = loopForCallFindWord(plantName = item, search_Param = "溫度", find_word = tempuratureText, except_word = tempuratureExceptText, period = 40)
+                if temp:
+                    break
+        '''
+        if temp:
+            returnList[tempuratureTitle] = temp 
+            myDB.setTempurature(plantDictionary[ChineseName], temp)
+        else:
+            print("Google Search of tempurature not found")
+
+    '''
     #用別名找資料庫資料
-    if returnList[tempuratureTitle] == "":
+    if not returnList[tempuratureTitle]:
         for name in plantDictionary[OtherName]:
             tempurature = myDB.getTempurature(name)
             if not tempurature == "":
                 returnList[tempuratureTitle] = tempurature
                 break
+        if not returnList[tempuratureTitle]:
+            print("Tempurature Not Found")
+    '''
 
-    #測試！從外部網站截取需要的溫度資訊
-    if returnList[tempuratureTitle] == "":
-        part_word = loopForCallFindWord(plantName = plantDictionary[ChineseName], search_Param = "溫度", find_word = tempuratureText, except_word = tempuratureExceptText, period = 20)
-        if len(part_word) <= 0:
-            for item in plantDictionary[OtherName]:
-                # 還在測試階段
-                #part_word = loopForCallFindWord(plantName = item, search_Param = "溫度", find_word = tempuratureText, except_word = tempuratureExceptText, period = 20)
-                if len(part_word) > 0:
-                    break
-                
-        returnResult = callFindWord(text_list = part_word, find_word = tempuratureText, except_word = tempuratureExceptText, period = 20, priority_word = tempuratureTextofPriority)
-        if returnResult == "":
-            print("Error")
-        else:
-            returnList[tempuratureTitle] = returnResult
-            myDB.setTempurature(plantDictionary[ChineseName], returnResult)
     return returnList[tempuratureTitle]
 
 
@@ -469,7 +494,7 @@ def webScrap(plantName):
 if __name__ == "__main__":
     plantName = input("查詢的植物：")
     if plantName == "":
-        plantName = "滿天星"
+        plantName = "含羞草"
     print("搜尋：", plantName)
     info = webScrap(plantName = plantName)
     print(info)
