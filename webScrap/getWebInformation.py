@@ -200,7 +200,6 @@ def getInformationFromWeb(url, keywords = []):
             checkText = part.find(keywords)
             if not checkText == -1:
                 return_part_word.append(part)
-                break
     return return_part_word
 
 

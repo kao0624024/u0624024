@@ -86,7 +86,7 @@ def getPh(plantName, fileName = phDB):
     for ph in phList:
         check = ph.split(",")
         for plant in plantName:
-            if check[0].find(plant) > -1:
+            if check[0].lower().find(plant.lower()) > -1:
                 return(check[1])
     f.close()
     return("")
@@ -106,7 +106,7 @@ def getMoisture(plantName, fileName = moistureDB):
     for moisture in moistureList:
         check = moisture.split(",")
         for plant in plantName:
-            if check[0].find(plant) > -1:
+            if check[0].lower().find(plant.lower()) > -1:
                 return(check[1])
     f.close()
     return("")
@@ -125,14 +125,14 @@ def getTempurature(plantName, fileName = tempuratureDB):
     tempuratureList = tempuratureList.split("\n")
     for tempurature in tempuratureList:
         check = tempurature.split(",")
-        if check[0].find(plantName) > -1:
+        if check[0].lower().find(plantName.lower()) > -1:
             return(check[1])
     f.close()
     return("")
 
 
 def setTempurature(plantName, tempuratureValue, fileName = tempuratureDB):
-    writeInDB = plantName + "," + tempuratureValue + "\n"
+    writeInDB = plantName + "," + tempuratureValue + ",℃\n"
     f = open(fileName, "a")
     f.write(writeInDB)
     f.close()
@@ -145,7 +145,7 @@ def getSunlight(plantName, fileName = sunlightDB):
     for sunlight in sunlightList:
         check = sunlight.split(",")
         for thePlant in plantName:
-            if check[0].find(thePlant) > -1:
+            if check[0].lower().find(thePlant.lower()) > -1:
                 return(check[1])
     f.close()
     return("")

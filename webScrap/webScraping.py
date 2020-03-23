@@ -310,7 +310,7 @@ def getTempuratureInformation(plantDictionary):
     returnList = {tempuratureTitle : "" }
     plantName = plantDictionary[ChineseName]
     #從資料庫找溫度
-    returnList[tempuratureTitle] = myDB.getTempurature(plantDictionary[ChineseName])
+    returnList[tempuratureTitle] = myDB.getTempurature(plantDictionary[EnglishName])
     tempuratureText = ["溫度", "適溫", "°C", "℃", "攝氏"] #統一第一個字為標題
     tempuratureExceptText = ["病"]
     tempuratureTextofPriority = ["生長適溫","合適溫度", "適宜溫度", "合適的溫度", "適宜的溫度"]
@@ -321,7 +321,7 @@ def getTempuratureInformation(plantDictionary):
         returnResult = callFindWord(text_list = part_word, find_word = tempuratureText, except_word = tempuratureExceptText, period = 20, priority_word = tempuratureTextofPriority)
         if not returnResult == "":
             returnList[tempuratureTitle] = returnResult
-            myDB.setTempurature(plantDictionary[ChineseName], returnResult)
+            myDB.setTempurature(plantDictionary[EnglishName], returnResult)
     
     #再一次從植物百科截取需要的溫度資訊
     if not returnList[tempuratureTitle]:
@@ -331,7 +331,7 @@ def getTempuratureInformation(plantDictionary):
             print("esayatm Not Found")
         else:
             returnList[tempuratureTitle] = returnResult
-            myDB.setTempurature(plantDictionary[ChineseName], returnResult)
+            myDB.setTempurature(plantDictionary[EnglishName], returnResult)
 
     #測試！從外部網站截取需要的溫度資訊
     if not returnList[tempuratureTitle]:
@@ -346,7 +346,7 @@ def getTempuratureInformation(plantDictionary):
         '''
         if temp:
             returnList[tempuratureTitle] = temp 
-            myDB.setTempurature(plantDictionary[ChineseName], temp)
+            myDB.setTempurature(plantDictionary[EnglishName], temp)
         else:
             print("Google Search of tempurature not found")
 

@@ -4,7 +4,7 @@ moistureDB = r"myDB\moisture.csv"
 tempuratureDB = r"myDB\tempurature.csv"
 sunlightDB = r"myDB\sunlight.csv"
 dictionaryName = {"中文名稱": "chineseName", "英文名稱":"englishName", "學名":"scientificName", "科名":"order", "別名":"otherName"}
-dictionaryInformation = {"溫度":"tempurature", "濕度":"moisture", "ph值":"ph value", "日照":"sun light"}
+dictionaryInformation = {"溫度":"tempurature", "濕度":"soil moisture", "ph值":"pH value", "日照":"sun light"}
 titleStrings = ["中文名稱", "英文名稱", "學名", "科名", ["別名", "別稱"], "只是防止出錯用的"]
 
 
