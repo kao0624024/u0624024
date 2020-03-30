@@ -3,7 +3,9 @@ import json
 import pandas as pd
 import requests as rq
 import re
+import os
 import myString
+from pathlib import Path
 import scrap
 import plantDB as myDB
 from bs4 import BeautifulSoup
@@ -465,13 +467,13 @@ def getSunlightInformation(plantDictionary):
     searchTextForEnglish = ["full sun", "partial shade", "full shade"]
 
     if returnList[sunlightTitle] == "":
-        result = findTheKeyWord(plantDictionary[ScientificName], "sun requirements", theKeyType = sunlightTitle, find_word = searchTextForEnglish, period = 150)
+        result = findTheKeyWord(plantDictionary[ScientificName], "sun requirements", theKeyType = sunlightTitle, find_word = searchTextForEnglish, period = 80)
 
         if not result:
-            result = findTheKeyWord(plantDictionary[EnglishName], "sun requirements", theKeyType = sunlightTitle, find_word = searchTextForEnglish, period = 150)
+            result = findTheKeyWord(plantDictionary[EnglishName], "sun requirements", theKeyType = sunlightTitle, find_word = searchTextForEnglish, period = 80)
 
         if not result:
-            result = findTheKeyWord(plantDictionary[ChineseName], "日照", theKeyType = sunlightTitle, find_word = searchTextForChinese, period = 60)
+            result = findTheKeyWord(plantDictionary[ChineseName], "日照", theKeyType = sunlightTitle, find_word = searchTextForChinese, period = 50)
             if result:
                 result = searchTextForEnglish[searchTextForChinese.index(result)]
 
@@ -488,9 +490,12 @@ def getSunlightInformation(plantDictionary):
     return returnList[sunlightTitle]
 
 
-def getPicture(plantDictionary):
-    
-    return None
+def getPicture(plantName):
+    picturePath = Path(pictureTitle + plantName + ".png")
+    if not picturePath.exists():
+        scrap.webForPicture(plantName)
+    #return None
+    return picturePath
 
 
 def getInformation(plantName):
@@ -511,7 +516,7 @@ def getInformation(plantName):
     returnList[sunlightTitle] = getSunlightInformation(plantDictionary)
 
     #picture
-    returnList[pictureTitle] = getPicture(plantDictionary)
+    returnList[pictureTitle] = getPicture(plantDictionary[ChineseName])
 
     print("returnList : ", returnList)
     return returnList
@@ -527,12 +532,13 @@ def webScrap(plantName):
 
 if __name__ == "__main__":
     plantName = input("查詢的植物：")
-    myDictionary = {ChineseName : [],
+    myDictionary = {ChineseName : "",
                     EnglishName : [],
                     ScientificName : [],
                     Order : []}
     if plantName == "":
-        plantName = "玫瑰花"
+        plantName = "百日草"
     print("搜尋：", plantName)
-    info = webScrap(plantName = plantName)
+    getPicture(plantName)
+    #info = webScrap(plantName = plantName)
 

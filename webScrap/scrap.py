@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import numpy as np
 #from google_images_download import google_images_download
 #import pandas as pd
@@ -7,6 +6,7 @@ import re
 from bs4 import BeautifulSoup
 import myString
 import urllib.request
+from urllib.parse import unquote, quote
 import os
 import time
 try: 
@@ -20,14 +20,40 @@ Order = myString.getPlantOrder()
 
 
 def webForWikipedia(plantName, myDictionary):
-    url = "https://zh.wikipedia.org/wiki/" + plantName 
+    url = ""
+    wikiURL = "https://zh.wikipedia.org/wiki/"
     needSite = "zh.wikipedia.org"
-    urlList = getNeedURL(plantName + " 植物", needSite)
+    urlList = getNeedURL(plantName + " 植物 ", needSite)
+    values = {"flower" : "花", "tree" : "樹", "bamboo" : "竹"}
+    
     for theurl in urlList:
-        if theurl.find(needSite) > -1:
+        strurl = unquote(theurl)
+        if strurl[len(wikiURL) + 1] == plantName:
+            print("1")
             print(theurl)
+            print(strurl)
             url = theurl
             break
+        if strurl.find(needSite) > -1 and strurl.find(values["flower"]) > -1:
+            print("2")
+            print(theurl)
+            print(strurl)
+            url = theurl
+        elif strurl.find(needSite) > -1 and strurl.find(values["tree"]) > -1:
+            print("3")
+            print(theurl)
+            print(strurl)
+            url = theurl
+        elif strurl.find(needSite) > -1 and strurl.find(values["bamboo"]) > -1:
+            print("4")
+            print(theurl)
+            print(strurl)
+            url = theurl
+        elif strurl.find(needSite) > -1 and strurl.find(plantName) > -1 and not(url):
+            print("5")
+            print(theurl)
+            print(strurl)
+            url = theurl
 
     try:
         response = rq.get(url) # 用 requests 的 get 方法把網頁抓下來
@@ -90,12 +116,12 @@ def webForPicture(plantName):
     paths = response.download(arguments)
     print("paths : ", paths)
     '''
+
     url = 'https://www.google.com.tw/search?q=' + plantName + ' &rlz=1C2CAFB_enTW617TW617&source=lnms&tbm=isch&sa=X&ved=0ahUKEwictOnTmYDcAhXGV7wKHX-OApwQ_AUICigB&biw=1128&bih=960'
 
     photolimit = 1 
 
     headers = {'User-Agent': 'Mozilla/5.0'}
-    #headers = {'Referer': 'http://', 'User-Agent': 'Mozilla/5.0'}
 
     response = rq.get(url,headers = headers) #使用header避免訪問受到限制
 
@@ -108,11 +134,20 @@ def webForPicture(plantName):
     if (os.path.exists(folder_path) == False): #判斷資料夾是否存在
         os.makedirs(folder_path) #Create folder
 
+    exceptcount = 0
+    getCount = 0
     for index , item in enumerate (items):
-        if (item and index < photolimit ):
-            html = rq.get('https:' + item.get('src')) # use 'get' to get photo link path , requests = send request
-            #img_name = folder_path + str(index + 1) + '.png'
+        if (item and getCount < photolimit ):
+            try:
+                html = rq.get(item.get('src')) # use 'get' to get photo link path , requests = send request
+                #img_name = folder_path + str(index + 1) + '.png'
+            except:
+                exceptcount += 1
+                continue
+
             img_name = folder_path + plantName + '.png'
+            print("Create new picture : ", img_name)
+            getCount += 1
 
             with open(img_name,'wb') as file: #以byte的形式將圖片數據寫入
                 file.write(html.content)
@@ -120,11 +155,13 @@ def webForPicture(plantName):
 
             file.close() #close file
 
-            print('第 %d 張' % (index + 1))
+            print('第 %d 張' % (getCount))
 
             time.sleep(1)
+        if getCount > photolimit:
+            break
 
-    print('Done')
+    print("picture exceptCount : ", exceptcount)
 
 
 def delWord(word, startWord = "<", endWord = ">"):
@@ -206,7 +243,8 @@ def getNeedEngURL(plantName, searchParam = ""):
 
 
 if __name__ == "__main__":
-    #print(webForWikipedia("玫瑰花"))
-    #webForPicture("百日草")
-    webForPicture("Zinnia")
+    #aa = []
+    #print(webForWikipedia("山茶", aa))
+    webForPicture("百日草")
+    #webForPicture("Zinnia")
 

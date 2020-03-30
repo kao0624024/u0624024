@@ -3,7 +3,7 @@ phDB = r"myDB\ph.csv"
 moistureDB = r"myDB\moisture.csv"
 tempuratureDB = r"myDB\temperature.csv"
 sunlightDB = r"myDB\sunlight.csv"
-pictureTitle = r"myDB\picture.csv"
+pictureTitle = r"myDB\photo\ "
 dictionaryName = {"中文名稱": "ChineseName", "英文名稱":"EnglishName", "學名":"ScientificName", "科名":"order", "別名":"OtherName"}
 dictionaryInformation = {"溫度":"Temperature", "濕度":"Soil Moisture", "ph值":"pH Value", "日照":"Sun light", "照片":"Picture"}
 titleStrings = ["中文名稱", "英文名稱", "學名", "科名", ["別名", "別稱"], "只是防止出錯用的"]
@@ -26,7 +26,8 @@ def getTempuratureDB():
 
 
 def getPicture():
-    return pictureTitle
+    #因為\" 會被視為字串，需要以空間來區間
+    return pictureTitle[:-1]
 
 
 def getSunlightDB():
@@ -69,7 +70,7 @@ def getSunlightName():
     return dictionaryInformation["日照"]
 
 
-def getPicture():
+def getPictureName():
     return dictionaryInformation["照片"] 
 
 
@@ -78,4 +79,4 @@ def getTitleStrings():
 
 
 if __name__ == "__main__":
-    print(nameDB)
+    print(getPicture())
