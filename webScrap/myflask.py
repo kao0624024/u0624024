@@ -1,11 +1,11 @@
 import flask
 app = flask.Flask(__name__)
-import webScraping as web
+import main 
 
 
 @app.route("/plant/<plantName>")
 def getPlant(plantName):
-    info = web.webScrap(plantName = plantName)
+    info = main.webScrap(plantName = plantName)
     return info
     #return plantName
 
