@@ -129,7 +129,7 @@ def webForPicture(plantName):
 
     items = soup.find_all('img')
 
-    folder_path ='./myDB/photo/'
+    folder_path = myString.getPicture()
 
     if (os.path.exists(folder_path) == False): #判斷資料夾是否存在
         os.makedirs(folder_path) #Create folder
