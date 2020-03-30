@@ -3,8 +3,9 @@ phDB = r"myDB\ph.csv"
 moistureDB = r"myDB\moisture.csv"
 tempuratureDB = r"myDB\temperature.csv"
 sunlightDB = r"myDB\sunlight.csv"
-dictionaryName = {"中文名稱": "chineseName", "英文名稱":"englishName", "學名":"scientificName", "科名":"order", "別名":"otherName"}
-dictionaryInformation = {"溫度":"temperature", "濕度":"soil moisture", "ph值":"pH value", "日照":"sun light"}
+pictureTitle = r"myDB\picture.csv"
+dictionaryName = {"中文名稱": "ChineseName", "英文名稱":"EnglishName", "學名":"ScientificName", "科名":"order", "別名":"OtherName"}
+dictionaryInformation = {"溫度":"Temperature", "濕度":"Soil Moisture", "ph值":"pH Value", "日照":"Sun light", "照片":"Picture"}
 titleStrings = ["中文名稱", "英文名稱", "學名", "科名", ["別名", "別稱"], "只是防止出錯用的"]
 
 
@@ -22,6 +23,10 @@ def getMoistureDB():
 
 def getTempuratureDB():
     return tempuratureDB
+
+
+def getPicture():
+    return pictureTitle
 
 
 def getSunlightDB():
@@ -62,6 +67,10 @@ def getPhName():
 
 def getSunlightName():
     return dictionaryInformation["日照"]
+
+
+def getPicture():
+    return dictionaryInformation["照片"] 
 
 
 def getTitleStrings():
