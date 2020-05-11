@@ -1,8 +1,8 @@
-中文名稱,百日草,英文名稱,Zinnia,Youth-and-old-age,,,,,,,,,
+中文名稱,百日草,英文名稱,Zinnia,Youth-and-old-age,學名,Catharanthus roseus,科名,夾竹桃科,Apocynaceae,長春花屬,Catharanthus,,
 中文名稱,向日葵,英文名稱,Sunflower,,,,,,,,,,
 中文名稱,玫瑰花,英文名稱,Japanese Rose,Rose,學名,Rosa rugosa,科名,薔薇科,Rosaceae,薔薇屬,Rosa,,
-中文名稱,仙人掌,英文名稱,Cactus,學名,科名,仙人掌科,Cactaceae
-中文名稱,滿天星,英文名稱,SessileAlternanthera,Star-skyAlternanthera,baby's-breath,學名,Gypsophila paniculata,科名,石竹科,Caryophyllaceae,石頭花屬,Gypsophila
+中文名稱,仙人掌,英文名稱,Cactus,學名,科名,仙人掌科,Cactaceae,,,,,,
+中文名稱,滿天星,英文名稱,SessileAlternanthera,Star-skyAlternanthera,baby's-breath,學名,Gypsophila paniculata,科名,石竹科,Caryophyllaceae,石頭花屬,Gypsophila,
 中文名稱,千日紅,英文名稱,Bachelor'sButton,Globeamaranth,,,,,,,,,
 中文名稱,含羞草,英文名稱,Humble-plant,SensitivePlant,CommonSensitiveplant,Ojigiso,學名,Mimosa pudica,科名,豆科,Fabaceae,含羞草屬,Mimosa
 中文名稱,月桂,英文名稱,BayLaurel,Bay,Laurel,SweetBay,,,,,,,
@@ -16,7 +16,7 @@
 中文名稱,吊燈花,英文名稱,fringed hibiscus,,,,,,,,,,
 中文名稱,馬拉巴栗,英文名稱,Guiana chestnut,,,,,,,,,,
 中文名稱,發財樹,英文名稱,Guiana chestnut,,,,,,,,,,
-中文名稱,山茶,英文名稱,camellia,學名,科名,山茶科,Theaceae
+中文名稱,山茶,英文名稱,camellia,學名,科名,山茶科,Theaceae,,,,,,
 中文名稱,雲南山茶,英文名稱,Yunnan camellia,,,,,,,,,,
 中文名稱,金花茶,英文名稱,golden camellia,,,,,,,,,,
 中文名稱,瑞香,英文名稱,daphne,,,,,,,,,,
@@ -27,7 +27,7 @@
 中文名稱,鵝掌柴,英文名稱,umbrella tree,,,,,,,,,,
 中文名稱,杜鵑花,英文名稱,rhododendron,,,,,,,,,,
 中文名稱,茉莉花,英文名稱,jasmine,,,,,,,,,,
-中文名稱,桂花,英文名稱,sweet osmanthus,學名,Osmanthus fragrans,科名,木犀科,Oleaceae,木犀屬,Osmanthus
+中文名稱,桂花,英文名稱,sweet osmanthus,學名,Osmanthus fragrans,科名,木犀科,Oleaceae,木犀屬,Osmanthus,,,
 中文名稱,夾竹桃,英文名稱,sweet-scented oleander,,,,,,,,,,
 中文名稱,黃花夾竹桃,英文名稱,lucky-nut-thevetia,,,,,,,,,,
 中文名稱,雞蛋花,英文名稱,frangipani,,,,,,,,,,
@@ -66,7 +66,7 @@
 中文名稱,虎耳草,英文名稱,creeping rockfoil,,,,,,,,,,
 中文名稱,八仙花,英文名稱,hydrangeas,,,,,,,,,,
 中文名稱,繡球花,英文名稱,hydrangeas,,,,,,,,,,
-中文名稱,梅花,英文名稱,mei flower,學名,Prunus mume,科名,薔薇科,Rosaceae,李屬,Prunus
+中文名稱,梅花,英文名稱,mei flower,學名,Prunus mume,科名,薔薇科,Rosaceae,李屬,Prunus,,,
 中文名稱,海桐,英文名稱,pittosporum,,,,,,,,,,
 中文名稱,廣東萬年青,英文名稱,china green,,,,,,,,,,
 中文名稱,龜背竹,英文名稱,monstera ceriman,,,,,,,,,,
@@ -90,7 +90,7 @@
 中文名稱,酒瓶蘭,英文名稱,elephant-foot tree,,,,,,,,,,
 中文名稱,六出花,英文名稱,alstroemeria,peruvian lily,,,,,,,,,
 中文名稱,地湧金蓮,英文名稱,hairy fruit musella,,,,,,,,,,
-中文名稱,天堂鳥,英文名稱,queen's bird-of-paradise flower,學名,Strelitzia reginae,科名,鶴望蘭科,Strelitziaceae,鶴望蘭屬,Strelitzia
+中文名稱,天堂鳥,英文名稱,queen's bird-of-paradise flower,學名,Strelitzia reginae,科名,鶴望蘭科,Strelitziaceae,鶴望蘭屬,Strelitzia,,,
 中文名稱,天堂鳥,英文名稱,queen's bird-of-paradise flower,,,,,,,,,,
 中文名稱,艷山姜,英文名稱,shell flower,,,,,,,,,,
 中文名稱,孔雀肖竹芋,英文名稱,peacock plant,,,,,,,,,,
@@ -174,7 +174,6 @@
 中文名稱,非洲菊,英文名稱,transvaal daisy,gerbera,,,,,,,,,
 中文名稱,扶郎花,英文名稱,transvaal daisy,gerbera,,,,,,,,,
 中文名稱,紫鵝絨,英文名稱,java velvetplant,,,,,,,,,,
-中文名稱,百日草,英文名稱,youth-and-old-age,zinnia,,,,,,,,,
 中文名稱,馬蹄蓮,英文名稱,calla lily,,,,,,,,,,
 中文名稱,香豌豆,英文名稱,sweet-pea,,,,,,,,,,
 中文名稱,彩葉草,英文名稱,common graden coleus,,,,,,,,,,
@@ -460,14 +459,3 @@
 中文名稱,馬櫻丹,英文名稱,Lantana,,,,,,,,,,
 中文名稱,宿根美女櫻,英文名稱,Rose verbena,creeping,,,,,,,,,
 中文名稱,葡萄,英文名稱,Grape,,,,,,,,,,
-
-
-
-
-
-
-
-
-
-
-

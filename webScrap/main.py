@@ -11,18 +11,24 @@ import plantDB as myDB
 from bs4 import BeautifulSoup
 
 
-temperatureTitle = myString.getTempuratureName()
+temperatureTitle = myString.getTemperatureName()
 moistureTitle = myString.getMoistureName()
 phTitle = myString.getPhName()
 sunlightTitle =  myString.getSunlightName()
 pictureTitle = myString.getPicture()
 
+ID = "ID"
 ChineseName = myString.getPlantCName()
 EnglishName = myString.getPlantEName()
 ScientificName = myString.getPlantSName()
 Order = myString.getPlantOrder()
 #OtherName = myString.getPlantOName()
 
+temperature = myString.getTemperatureName()
+moisture = myString.getMoistureName()
+pH = myString.getPhName()
+sunlight = myString.getSunlightName()
+picture = myString.getPictureName()
 
 def findWord(text_list = [], find_word = [], except_word = [], period = 20, priority_word = [], sameWord = [], replaceTo = ""):
     answerList = []
@@ -309,7 +315,8 @@ def findTheKeyWord(plantName, search_Param, theKeyType, find_word = [], except_w
 def getPlantName(plantName):
     titleStrings = myString.getTitleStrings()
     titleDictionary = [ChineseName, EnglishName, ScientificName, Order]
-    myDictionary = {ChineseName : [],
+    myDictionary = {ID : [],
+                    ChineseName : [],
                     EnglishName : [],
                     ScientificName : [],
                     Order : []}
@@ -326,45 +333,31 @@ def getPlantName(plantName):
             else:
                 print("Scientific Name not found!")
         else:
+            
             return None
     return myDictionary
 
 
 def getTemperatureInformation(plantDictionary):
     returnList = {temperatureTitle : ""}
-    #temperature
-    returnList[temperatureTitle] = myDB.getTemperature(plantDictionary[EnglishName])
-    if returnList[temperatureTitle] == "":
-        returnList[temperatureTitle] = myDB.getTemperature(plantDictionary[ScientificName])
 
-    if returnList[temperatureTitle] == "":
-        for name in plantDictionary[Order]:
-            temperature = myDB.getTemperature(name)
-            if not temperature == "":
-                returnList[temperatureTitle] = temperature
-                break
+    searchTextForChinese = ["溫度", "°C", "℃", "攝氏"]
+    searchTextForEnglish = ["temperature", "Temperature"]
+    temperatureTextofPriority = ["最適生長溫度", "最適溫度", "生長溫度","合適溫度", "適宜溫度", "合適的溫度", "適宜的"]
+    sameWord = ["適溫", "氣溫"]
+    temperatureTextofEnglishPriority = ["prefer"]
 
-    if returnList[temperatureTitle] == "":
-        searchTextForChinese = ["溫度", "°C", "℃", "攝氏"]
-        searchTextForEnglish = ["temperature", "Temperature"]
-        temperatureTextofPriority = ["最適生長溫度", "最適溫度", "生長溫度","合適溫度", "適宜溫度", "合適的溫度", "適宜的"]
-        sameWord = ["適溫", "氣溫"]
-        temperatureTextofEnglishPriority = ["prefer"]
+    #截資訊
+    result = findTheKeyWord(plantDictionary[ChineseName], "適溫", theKeyType = temperatureTitle, find_word = searchTextForChinese, period = 15, priority_word = temperatureTextofPriority, sameWord = sameWord, replaceTo = "溫度")
+    if not result:
+        result = findTheKeyWord(plantDictionary[ScientificName], "temperature requirements", theKeyType = temperatureTitle, find_word = searchTextForEnglish, period = 50, priority_word = temperatureTextofEnglishPriority)
 
-        #截資訊
-        result = findTheKeyWord(plantDictionary[ChineseName], "適溫", theKeyType = temperatureTitle, find_word = searchTextForChinese, period = 15, priority_word = temperatureTextofPriority, sameWord = sameWord, replaceTo = "溫度")
-        if not result:
-            result = findTheKeyWord(plantDictionary[ScientificName], "temperature requirements", theKeyType = temperatureTitle, find_word = searchTextForEnglish, period = 50, priority_word = temperatureTextofEnglishPriority)
+    if not result:
+        result = findTheKeyWord(plantDictionary[EnglishName], "temperature requirements", theKeyType = temperatureTitle, find_word = searchTextForEnglish, period = 50, priority_word = temperatureTextofEnglishPriority)
 
-        if not result:
-            result = findTheKeyWord(plantDictionary[EnglishName], "temperature requirements", theKeyType = temperatureTitle, find_word = searchTextForEnglish, period = 50, priority_word = temperatureTextofEnglishPriority)
-
-        if result:
-            returnList[temperatureTitle] = result
-            myDB.setTemperature(plantDictionary[EnglishName][0], result)
-            return returnList[temperatureTitle]
-    else:
-        print("temperature get from DB")
+    if result:
+        returnList[temperatureTitle] = result
+        myDB.setTable(plantDictionary[ID], temperature, result)
 
     if not returnList[temperatureTitle]:
         print("temperature Not Found!")
@@ -374,35 +367,20 @@ def getTemperatureInformation(plantDictionary):
 def getPhInformation(plantDictionary): 
     returnList = {phTitle : ""}
     #ph值
-    returnList[phTitle] = myDB.getPh(plantDictionary[EnglishName])
-    if returnList[phTitle] == "":
-        returnList[phTitle] = myDB.getPh(plantDictionary[ScientificName])
+    searchTextForChinese = ["ph", "pH"]
+    searchTextForEnglish = ["ph", "pH"]
 
-    if returnList[phTitle] == "":
-        for name in plantDictionary[Order]:
-            ph = myDB.getPh(name)
-            if not ph == "":
-                returnList[phTitle] = ph
-                break
+    #截資訊
+    result = findTheKeyWord(plantDictionary[EnglishName], "pH requirements", theKeyType = phTitle, find_word = searchTextForEnglish, period = 80)
+    if not result:
+        result = findTheKeyWord(plantDictionary[ScientificName], "pH requirements", theKeyType = phTitle, find_word = searchTextForEnglish, period = 80)
 
-    if returnList[phTitle] == "":
-        searchTextForChinese = ["ph", "pH"]
-        searchTextForEnglish = ["ph", "pH"]
+    if not result:
+        result = findTheKeyWord(plantDictionary[ChineseName], "pH值", theKeyType = phTitle, find_word = searchTextForChinese, period = 30)
 
-        #截資訊
-        result = findTheKeyWord(plantDictionary[EnglishName], "pH requirements", theKeyType = phTitle, find_word = searchTextForEnglish, period = 80)
-        if not result:
-            result = findTheKeyWord(plantDictionary[ScientificName], "pH requirements", theKeyType = phTitle, find_word = searchTextForEnglish, period = 80)
-
-        if not result:
-            result = findTheKeyWord(plantDictionary[ChineseName], "pH值", theKeyType = phTitle, find_word = searchTextForChinese, period = 30)
-
-        if result:
-            returnList[phTitle] = result
-            myDB.setPh(plantDictionary[EnglishName][0], result)
-            return returnList[phTitle]
-    else:
-        print("pH value get from DB")
+    if result:
+        returnList[phTitle] = result
+        myDB.setTable(plantDictionary[ID], pH, result)
 
     if not returnList[phTitle]:
         print("pH Value Not Found!")
@@ -412,37 +390,20 @@ def getPhInformation(plantDictionary):
 def getMoistureInformation(plantDictionary):
     returnList = {moistureTitle : ""}
     #Moisture
+    searchTextForChinese = ["濕度"]
+    searchTextForEnglish = ["moisture", "Moisture", "extremely-dry", "extremely dry", "dry-drained", "well-drained", "dry drained", "well drained", "moist", "wet"]
 
-    returnList[moistureTitle] = myDB.getMoisture(plantDictionary[EnglishName])
-    if returnList[moistureTitle] == "":
-        returnList[moistureTitle] = myDB.getMoisture(plantDictionary[ScientificName])
+    #截資訊
+    result = findTheKeyWord(plantDictionary[EnglishName], "moisture requirements", theKeyType = moistureTitle, find_word = searchTextForEnglish, period = 80)
+    if not result:
+        result = findTheKeyWord(plantDictionary[ScientificName], "moisture requirements", theKeyType = moistureTitle, find_word = searchTextForEnglish, period = 80)
 
-    if returnList[moistureTitle] == "":
-        for name in plantDictionary[Order]:
-            moisture = myDB.getMoisture(name)
-            if not moisture == "":
-                returnList[moistureTitle] = moisture
-                break
-    
-    if returnList[moistureTitle] == "":
-        searchTextForChinese = ["濕度"]
-        searchTextForEnglish = ["moisture", "Moisture", "extremely-dry", "extremely dry", "dry-drained", "well-drained", "dry drained", "well drained", "moist", "wet"]
+    if not result:
+        result = findTheKeyWord(plantDictionary[ChineseName], "濕度", theKeyType = moistureTitle, find_word = searchTextForChinese, period = 30)
 
-        #截資訊
-        result = findTheKeyWord(plantDictionary[EnglishName], "moisture requirements", theKeyType = moistureTitle, find_word = searchTextForEnglish, period = 80)
-        if not result:
-            result = findTheKeyWord(plantDictionary[ScientificName], "moisture requirements", theKeyType = moistureTitle, find_word = searchTextForEnglish, period = 80)
-
-        if not result:
-            result = findTheKeyWord(plantDictionary[ChineseName], "濕度", theKeyType = moistureTitle, find_word = searchTextForChinese, period = 30)
-
-        if result:
-            returnList[moistureTitle] = result
-            myDB.setMoisture(plantDictionary[EnglishName][0], result)
-            return returnList[moistureTitle]
-        
-    else:
-        print("moisture get from DB")
+    if result:
+        returnList[moistureTitle] = result
+        myDB.setTable(plantDictionary[ID], moisture, result)
 
     if not returnList[moistureTitle]:
         print("Moisture Not Found!")
@@ -451,39 +412,23 @@ def getMoistureInformation(plantDictionary):
 
 def getSunlightInformation(plantDictionary):
     returnList = {sunlightTitle : ""}
-    #Sunlight
-    returnList[sunlightTitle] = myDB.getSunlight(plantDictionary[EnglishName])
-    if returnList[sunlightTitle] == "":
-        returnList[sunlightTitle] = myDB.getSunlight(plantDictionary[ScientificName])
-
-    if returnList[sunlightTitle] == "":
-        for name in plantDictionary[Order]:
-            sunlight = myDB.getSunlight(name)
-            if not sunlight == "":
-                returnList[sunlightTitle] = sunlight
-                break
 
     searchTextForChinese = ["全日照", "半日照", "陰蔽"] #"半陰", "陰蔽"]
     searchTextForEnglish = ["full sun", "partial shade", "full shade"]
 
-    if returnList[sunlightTitle] == "":
-        result = findTheKeyWord(plantDictionary[ScientificName], "sun requirements", theKeyType = sunlightTitle, find_word = searchTextForEnglish, period = 80)
+    result = findTheKeyWord(plantDictionary[ScientificName], "sun requirements", theKeyType = sunlightTitle, find_word = searchTextForEnglish, period = 80)
 
-        if not result:
-            result = findTheKeyWord(plantDictionary[EnglishName], "sun requirements", theKeyType = sunlightTitle, find_word = searchTextForEnglish, period = 80)
+    if not result:
+        result = findTheKeyWord(plantDictionary[EnglishName], "sun requirements", theKeyType = sunlightTitle, find_word = searchTextForEnglish, period = 80)
 
-        if not result:
-            result = findTheKeyWord(plantDictionary[ChineseName], "日照", theKeyType = sunlightTitle, find_word = searchTextForChinese, period = 50)
-            if result:
-                result = searchTextForEnglish[searchTextForChinese.index(result)]
-
+    if not result:
+        result = findTheKeyWord(plantDictionary[ChineseName], "日照", theKeyType = sunlightTitle, find_word = searchTextForChinese, period = 50)
         if result:
-            returnList[sunlightTitle] = result
-            myDB.setSunlight(plantDictionary[EnglishName][0], returnList[sunlightTitle])
-            return returnList[sunlightTitle]
+            result = searchTextForEnglish[searchTextForChinese.index(result)]
 
-    else:
-        print("Sunlight get from DB")
+    if result:
+        returnList[sunlightTitle] = result
+        myDB.setTable(plantDictionary[ID], sunlight, result)
 
     if not returnList[sunlightTitle]:
         print("Sunlight Not Found!")
@@ -499,12 +444,15 @@ def getPicture(plantName):
 
 
 def getInformation(plantName):
-    returnList = {temperatureTitle:"", phTitle:"", moistureTitle: "" , sunlightTitle: "", pictureTitle : ""} 
+    returnList = {temperatureTitle:"", phTitle:"", moistureTitle: "" , sunlightTitle: "")#, pictureTitle : ""} 
     #getName
     plantDictionary = getPlantName(plantName)
 
     #Tempurature
-    returnList[temperatureTitle] = getTemperatureInformation(plantDictionary)
+    if plantDictionary[temperature]:
+        returnList[temperatureTitle] = plantDictionary[temperatureTitle]
+    else:
+        returnList[temperatureTitle] = getTemperatureInformation(plantDictionary)
 
     #ph
     returnList[phTitle] = getPhInformation(plantDictionary) 
@@ -516,7 +464,7 @@ def getInformation(plantName):
     returnList[sunlightTitle] = getSunlightInformation(plantDictionary)
 
     #picture
-    returnList[pictureTitle] = getPicture(plantDictionary[ChineseName])
+    #returnList[pictureTitle] = getPicture(plantDictionary[ChineseName])
 
     print("returnList : ", returnList)
     return returnList
@@ -532,13 +480,15 @@ def webScrap(plantName):
 
 if __name__ == "__main__":
     plantName = input("查詢的植物：")
-    myDictionary = {ChineseName : "",
+    myDictionary = {ID : 0,
+                    ChineseName : "",
                     EnglishName : [],
                     ScientificName : [],
                     Order : []}
     if plantName == "":
         plantName = "百日草"
     print("搜尋：", plantName)
-    getPicture(plantName)
-    #info = webScrap(plantName = plantName)
+    #getPicture(plantName)
+    info = webScrap(plantName = plantName)
+    print(info)
 

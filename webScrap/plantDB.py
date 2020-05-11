@@ -1,5 +1,12 @@
 import myString
+import pymysql
 
+
+dbUser = myString.getDBUser()
+dbPass = myString.getDBPass()
+dbName = myString.getDBName()
+myport = myString.getDBPort()
+myHost = myString.getDBHost()
 
 nameDB = myString.getNameDB() 
 phDB = myString.getPhDB()
@@ -7,240 +14,182 @@ moistureDB = myString.getMoistureDB()
 temperatureDB = myString.getTempuratureDB()
 sunlightDB = myString.getSunlightDB()
 
+ID = "ID"
 ChineseName = myString.getPlantCName()
 EnglishName = myString.getPlantEName()
 ScientificName = myString.getPlantSName()
 Order = myString.getPlantOrder()
 #OtherName = myString.getPlantOName()
 
-def getPlantName(plantName, fileName = nameDB):
+temperature = myString.getTemperatureName()
+moisture = myString.getMoistureName()
+pH = myString.getPhName()
+sunlight = myString.getSunlightName()
+picture = myString.getPictureName()
+
+def getPlantName(plantName, dbName = dbName, domain = myHost, user = dbUser, passwd = dbPass, port = myport ):#, fileName = nameDB):
     #要回傳的
-    plantDictionary = {ChineseName : [],
+    plantDictionary = {ID : 0,
+                    ChineseName : [],
                     EnglishName : [],
                     ScientificName : [],
-                    Order : []}
+                    Order : [],
+                    pH : [],
+                    temperature : [],
+                    moisture : [],
+                    sunlight : [],
+                    picture : []}
                     
     #方便讀取字典
     titleStrings = ["中文名稱", "英文名稱", "學名", "科名", "只是防止出錯用的"]
-    dictionaryString = [ChineseName, EnglishName, ScientificName, Order]
-    f = open(fileName, "r")
-    nameList = f.read()
+    dictionaryString = [ID, ChineseName, EnglishName, ScientificName, Order, pH, temperature, moisture, sunlight, picture]
 
-    nameList = nameList.split("\n")
-    #用來記錄優先度的list，如：有中文名稱一樣的為主，而別名相同的優先度再後
-    returnList = []
-    for name in nameList:
-        #csv以逗號分隔
-        checkList = name.split(",")
-        for index, check in enumerate(checkList):
-            if check.find(plantName) > -1:
-                #有找到，第一個為找到的位置數值，第二為內容
-                returnList.append(index)
-                returnList.append(name)
-    f.close()
-    #表示沒找到，長度才會等於0
-    if len(returnList) == 0:
-        return plantDictionary
-    priority = 0
-    for index in range(len(returnList)):
-        #0,2,4...為數值(優先度)，1,3,5為對應的內容
-        if not index / 2 == 0:
-            continue
-        #數值越小表示越先找到對應的值，而中文名稱為最前面，藉此判斷優先度
-        if priority < returnList[index]:
-            priority = index
-    index = 0
-    itemList = returnList[priority + 1].split(",")
-    for addItem in itemList:
-        if addItem == titleStrings[0] : continue
-        if addItem == titleStrings[index + 1]:
-            index = index + 1
-            continue
-        plantDictionary[dictionaryString[index]].append(addItem)
+    #開啟資料庫連線，指定資料庫
+    conn = pymysql.connect(host = domain, port = port, user = user, passwd = passwd)
+    conn.select_db(dbName)
+    #獲取遊標
+    cursor=conn.cursor()
+    #Search
+    cursor.execute('SELECT * FROM plant where cname = "' + plantName + '";')
+    while 1:
+        res = cursor.fetchone()
+        if not res :
+            break
+        for i, items in enumerate(res):
+            if i <= 1 or i >= 5: 
+                plantDictionary[dictionaryString[i]] = items
+                continue
+            items = items.split(",")
+            strlist = []
+            for item in items:
+                strlist.append(item)
 
-    for thetitle in dictionaryString:
-        while "" in plantDictionary[thetitle]:
-            plantDictionary[thetitle].remove("")
+            plantDictionary[dictionaryString[i]] = strlist
 
+    print(plantDictionary)
 
-    #主程式的中文名稱是用String
-    plantDictionary[ChineseName] = str(plantDictionary[ChineseName][0])
+    cursor.close()#先關閉遊標
+    conn.commit()
+    conn.close()#再關閉資料庫連線
+    print("success")
     return plantDictionary
 
 
-def setPlantName(plantDictionary, fileName = nameDB):
-    titleStrings = ["中文名稱", "英文名稱", "學名", "科名", "只是防止出錯用的"]
-    dictionaryString = [ChineseName, EnglishName, ScientificName, Order]
-    writeInDB = "中文名稱," + plantDictionary[ChineseName] + ","
-    for index in range(1, len(titleStrings)):
-        if index == len(titleStrings) - 1:
-            #表示已經跑完
-            writeInDB = writeInDB[:-1]
-            writeInDB = writeInDB + "\n"
-            break
-        writeInDB = writeInDB + titleStrings[index] + ","
-        for item in plantDictionary[dictionaryString[index]]:
-            writeInDB = writeInDB + item + ","
-    f = open(fileName, "a")
-    f.write(writeInDB)
-    f.close()
-    
+def setPlantName(plantDictionary, dbName = dbName, domain = myHost, user = dbUser, passwd = dbPass, port = myport):#, fileName = nameDB):
+    #開啟資料庫連線
+    conn = pymysql.connect(host = domain, port = port, user = dbUser, passwd = dbPass, db = dbName)
+    conn.select_db(dbName)
+    #獲取遊標
+    cursor=conn.cursor()
+    #另一種插入資料的方式，通過字串傳入值
+    sql="insert into plant (cname,ename,sname,oname) values(%s,%s,%s,%s)"
+    cursor.execute(sql,(plantDictionary[ChineseName], ",".join(plantDictionary[EnglishName]), ",".join(plantDictionary[ScientificName]), ",".join(plantDictionary[Order])))
 
-def updatePlantName(plantDictionary, plantName, fileName = nameDB):
-    f = open(fileName, "r")
-
-    dictionaryStrings = [ChineseName, EnglishName, ScientificName, Order]
-    titleStrings = ["中文名稱", "英文名稱", "學名", "科名"]
-
-    plantList = f.read()
-    f.close()
-    plantList = plantList.split("\n")
-    updateTextList = []
-    index = 0
-    updateCheck = False 
-
-    for plant in plantList:
-        check = plant.split(",")
-
-        while "" in check:
-            check.remove("")
-        
-        engPlantInDB = check[3:]
-
-        for engPlant in plantName:
-            for dbName in engPlantInDB:
-                if str.lower(dbName).find(str.lower(engPlant)) > -1 and abs(len(dbName) - len(engPlant)) < 3:
-                    updateTextList = plant
-                    updateCheck = True 
-                break
-            if updateCheck:
-                break
-        if updateCheck:
-            break
-        index = index + 1
- 
-    if not updateCheck:
-        return 
-
-    newString = ""
-    for i, item in enumerate(dictionaryStrings):
-        newString += titleStrings[i] + ","
-        if isinstance(plantDictionary[item], list):
-            for item2 in plantDictionary[item]:
-                if item2 == "":
-                    continue
-                newString += item2 + ","
-        else:
-            newString += plantDictionary[item] + ","
-    newString = newString[:-1]
-
-    f = open(fileName, "w")
-    for index2, lines in enumerate(plantList):
-        if index == index2:
-            f.writelines(newString + "\n")
-        else:
-            f.writelines(lines + "\n")
-    f.close()
+    cursor.close()
+    conn.commit()
+    conn.close()
 
 
-def getPh(plantName, fileName = phDB):
-    f = open(fileName, "r")
-    phList = f.read()
-    phList = phList.split("\n")
-    for ph in phList:
-        check = ph.split(",")
-        if isinstance(plantName, list):
-            for thePlant in plantName:
-                if str.lower(check[0]).find(str.lower(thePlant)) > -1 and abs(len(check[0]) - len(thePlant)) < 5:
-                    return(check[1])
-        else:
-            if str.lower(check[0]).find(str.lower(plantName)) > -1 and abs(len(check[0]) - len(plantName)) < 5:
-                return(check[1])
-    f.close()
-    return("")
+def updatePlantName(plantDictionary, plantID, dbName = dbName, domain = myHost, user = dbUser, passwd = dbPass, port = myport):
+    #開啟資料庫連線
+    conn = pymysql.connect(host = domain, port = port, user = dbUser, passwd = dbPass, db = dbName)
+    conn.select_db(dbName)
+    #獲取遊標
+    cursor=conn.cursor()
+    #另一種插入資料的方式，通過字串傳入值
+    sql="update plant set cname  = %s where id = " + str(plantID)
+    cursor.execute(sql,(plantDictionary[ChineseName]))
+    sql="update plant set ename  = %s where id = " + str(plantID)
+    cursor.execute(sql,(",".join(plantDictionary[EnglishName])))
+    sql="update plant set sname  = %s where id = " + str(plantID)
+    cursor.execute(sql,(",".join(plantDictionary[ScientificName])))
+    sql="update plant set oname  = %s where id = " + str(plantID)
+    cursor.execute(sql,(",".join(plantDictionary[Order])))
+
+    cursor.close()
+    conn.commit()
+    conn.close()
+    print("update success")
 
 
-def setPh(plantName, phValue, fileName = phDB):
-    writeInDB = plantName + "," + phValue + "\n"
-    f = open(fileName, "a")
-    f.write(writeInDB)
-    f.close()
+def setTable(plantID, setType, setText, dbName = dbName, domain = myHost, user = dbUser, passwd = dbPass, port = myport):
+    #開啟資料庫連線
+    conn = pymysql.connect(host = domain, port = port, user = dbUser, passwd = dbPass, db = dbName)
+    conn.select_db(dbName)
+    #獲取遊標
+    cursor=conn.cursor()
+    #另一種插入資料的方式，通過字串傳入值
+    sql="update plant set " + setType + " = %s where id = " + str(plantID)
+    cursor.execute(sql,(setText))
+
+    cursor.close()
+    conn.commit()
+    conn.close()
+    print("update " + setType + " success")
 
 
-def getMoisture(plantName, fileName = moistureDB):
-    f = open(fileName, "r")
-    moistureList = f.read()
-    moistureList = moistureList.split("\n")
-    for moisture in moistureList:
-        check = moisture.split(",")
-        if isinstance(plantName, list):
-            for thePlant in plantName:
-                if str.lower(check[0]).find(str.lower(thePlant)) > -1 and abs(len(check[0]) - len(thePlant)) < 5:
-                    return(check[1])
-        else:
-            if str.lower(check[0]).find(str.lower(plantName)) > -1 and abs(len(check[0]) - len(plantName)) < 5:
-                return(check[1])
-    f.close()
-    return("")
+def createDB(dbname = dbName, domain = myHost, user = dbUser, passwd = dbPass, port = myport):
+    #開啟資料庫連線，不需要指定資料庫，因為需要建立資料庫 
+    conn = pymysql.connect(host = domain, port = port, user = user, passwd = passwd)
+    #獲取遊標
+    cursor=conn.cursor()
+    #建立pythonBD資料庫
+    cursor.execute('CREATE DATABASE IF NOT EXISTS ' + dbname + ' DEFAULT CHARSET utf8 COLLATE utf8_general_ci;')
+    cursor.close()#先關閉遊標
+    conn.close()#再關閉資料庫連線
+    print('建立' + dbname + '資料庫成功')
 
 
-def setMoisture(plantName, moistureValue, fileName = moistureDB):
-    writeInDB = plantName + "," + moistureValue + "\n"
-    f = open(fileName, "a")
-    f.write(writeInDB)
-    f.close()
+def createTable(dbName = dbName, domain = myHost, user = dbUser, passwd = dbPass, port = myport):
+    #開啟資料庫連線
+    conn = pymysql.connect(host = domain, port = port, user = dbUser, passwd = dbPass, db = dbName)
+    #獲取遊標
+    cursor=conn.cursor()
+    print(cursor)
 
+    #建立 plant表
+    cursor.execute('drop table if exists plant')
+    sql="""CREATE TABLE IF NOT EXISTS plant (
+          id int(11) NOT NULL AUTO_INCREMENT,
+          cname varchar(60) NOT NULL,
+          ename varchar(60) NOT NULL,
+          sname varchar(60) DEFAULT '',
+          oname varchar(60) DEFAULT '',
+          pH varchar(20) DEFAULT '',
+          temperature varchar(20) DEFAULT '',
+          moisture varchar(20) DEFAULT '',
+          sunlight varchar(20) DEFAULT '',
+          picture varchar(255) DEFAULT '',
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0"""
 
-def getTemperature(plantName, fileName = temperatureDB):
-    f = open(fileName, "r")
-    temperatureList = f.read()
-    temperatureList = temperatureList.split("\n")
-    for temperature in temperatureList:
-        check = temperature.split(",")
-        if isinstance(plantName, list):
-            for thePlant in plantName:
-                if str.lower(check[0]).find(str.lower(thePlant)) > -1 and abs(len(check[0]) - len(thePlant)) < 5:
-                    return(check[1])
-        else:
-            if str.lower(check[0]).find(str.lower(plantName)) > -1 and abs(len(check[0]) - len(plantName)) < 5:
-                return(check[1])
+    cursor.execute(sql)
 
-    f.close()
-    return("")
-
-
-def setTemperature(plantName, temperatureValue, fileName = temperatureDB):
-    writeInDB = plantName + "," + temperatureValue + ",℃\n"
-    f = open(fileName, "a")
-    f.write(writeInDB)
-    f.close()
-
-
-def getSunlight(plantName, fileName = sunlightDB):
-    f = open(fileName, "r")
-    sunlightList = f.read()
-    sunlightList = sunlightList.split("\n")
-    for sunlight in sunlightList:
-        check = sunlight.split(",")
-        if isinstance(plantName, list):
-            for thePlant in plantName:
-                if str.lower(check[0]).find(str.lower(thePlant)) > -1 and abs(len(check[0]) - len(thePlant)) < 5:
-                    return(check[1])
-        else:
-            if str.lower(check[0]).find(str.lower(plantName)) > -1 and abs(len(check[0]) - len(plantName)) < 5:
-                return(check[1])
-
-    f.close()
-    return("")
-
-
-def setSunlight(plantName, sunlightValue, fileName = sunlightDB):
-    writeInDB = plantName + "," + sunlightValue + "\n"
-    f = open(fileName, "a")
-    f.write(writeInDB)
-    f.close()
+    cursor.close()#先關閉遊標
+    conn.close()#再關閉資料庫連線
+    print('建立資料表成功')
 
 
 if __name__ == "__main__":
-    getSunlight("百日草")
-
+    #createTable()
+    plantDictionary = getPlantName("百日草")
+    #setTable(plantDictionary[ID], pH, "2.5-4.1")
+    #print(plantDictionary)
+    #setTable(plantDictionary[ID], pH, "")
+    #print(plantDictionary)
+    
+    #getSunlight("百日草")
+    '''
+    plantDictionary = {ID : 463,
+                    ChineseName : "aaa",
+                    EnglishName : ['aa'],
+                    ScientificName : ['abd'],
+                    Order : [],
+                    pH : "",
+                    temperature : "",
+                    moisture : "",
+                    sunlight : "",
+                    picture : ""}
+    #setPlantName(plantDictionary)
+    updatePlantName(plantDictionary, 463)
+    '''
