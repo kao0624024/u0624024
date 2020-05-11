@@ -1,5 +1,5 @@
 dbUser = "root"
-dbPass = "GW32jw2gAKTJ"
+dbPass = "123456"
 dbName = "scrap_db"
 dbPort = 3310
 dbHost = "localhost"
