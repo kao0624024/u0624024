@@ -30,15 +30,15 @@ picture = myString.getPictureName()
 def getPlantName(plantName, dbName = dbName, domain = myHost, user = dbUser, passwd = dbPass, port = myport ):#, fileName = nameDB):
     #要回傳的
     plantDictionary = {ID : 0,
-                    ChineseName : [],
-                    EnglishName : [],
-                    ScientificName : [],
-                    Order : [],
-                    pH : [],
-                    temperature : [],
-                    moisture : [],
-                    sunlight : [],
-                    picture : []}
+                    ChineseName : '',
+                    EnglishName : [''],
+                    ScientificName : [''],
+                    Order : [''],
+                    pH : '',
+                    temperature : '',
+                    moisture : '',
+                    sunlight : '',
+                    picture : ''}
                     
     #方便讀取字典
     titleStrings = ["中文名稱", "英文名稱", "學名", "科名", "只是防止出錯用的"]
@@ -172,24 +172,26 @@ def createTable(dbName = dbName, domain = myHost, user = dbUser, passwd = dbPass
 
 if __name__ == "__main__":
     #createTable()
-    plantDictionary = getPlantName("百日草")
+    #plantDictionary = getPlantName("百日草")
     #setTable(plantDictionary[ID], pH, "2.5-4.1")
     #print(plantDictionary)
     #setTable(plantDictionary[ID], pH, "")
     #print(plantDictionary)
     
     #getSunlight("百日草")
-    '''
-    plantDictionary = {ID : 463,
-                    ChineseName : "aaa",
-                    EnglishName : ['aa'],
-                    ScientificName : ['abd'],
-                    Order : [],
-                    pH : "",
-                    temperature : "",
-                    moisture : "",
-                    sunlight : "",
+    
+    plantDictionary = {ID : 19,
+                    ChineseName : "山茶",
+                    EnglishName : ['camellia'],
+                    ScientificName : [],
+                    Order : ["山茶科", "Theaceae"],
+                    pH : "4.5-5.5",
+                    temperature : "10-16",
+                    moisture : "21-40",
+                    sunlight : "full sun",
                     picture : ""}
+    setTable(plantDictionary[ID], pH, plantDictionary[pH])
+    print(plantDictionary)
     #setPlantName(plantDictionary)
-    updatePlantName(plantDictionary, 463)
-    '''
+    #updatePlantName(plantDictionary, 463)
+    

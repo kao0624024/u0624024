@@ -315,25 +315,36 @@ def findTheKeyWord(plantName, search_Param, theKeyType, find_word = [], except_w
 def getPlantName(plantName):
     titleStrings = myString.getTitleStrings()
     titleDictionary = [ChineseName, EnglishName, ScientificName, Order]
-    myDictionary = {ID : [],
-                    ChineseName : [],
-                    EnglishName : [],
-                    ScientificName : [],
-                    Order : []}
+    myDictionary = {ID : 0,
+                    ChineseName : "",
+                    EnglishName : [''],
+                    ScientificName : [''],
+                    Order : ['']}
     myDictionary = myDB.getPlantName(plantName)
     
     #表示資料庫沒有資料
-    if len(myDictionary[ScientificName]) < 1:
+    if not myDictionary[ScientificName][0]:
         if myDictionary[ChineseName]:
             myDictionary = scrap.webForWikipedia(plantName, myDictionary)
             print("plantName function dictionary : ", myDictionary)
             
             if len(myDictionary[Order]) > 0:
-                myDB.updatePlantName(myDictionary, myDictionary[EnglishName])
+                myDB.updatePlantName(myDictionary, myDictionary[ID])
             else:
                 print("Scientific Name not found!")
         else:
-            
+            '''
+            urllist = getNeedURL(plantName, "植物") 
+            if len(getInformationFromWeb[urllist[0], ["植物", "花", "草", "樹", "茶"]) > 0:
+                from googletrans import Translator
+                translator = Translator()
+                myDictionary[ChineseName] = plantName
+                myDictionary[EnglishName] = translator.translate(plantName, dest = "en")
+                myDictionary = scrap.webForWikipedia(plantName, myDictionary)
+                myDB.updatePlantName(myDictionary, myDictionary[ID])
+            '''
+            print("目前無所查植物")
+
             return None
     return myDictionary
 
@@ -444,9 +455,11 @@ def getPicture(plantName):
 
 
 def getInformation(plantName):
-    returnList = {temperatureTitle:"", phTitle:"", moistureTitle: "" , sunlightTitle: "")#, pictureTitle : ""} 
+    returnList = {temperatureTitle:"", phTitle:"", moistureTitle: "" , sunlightTitle: ""}#, pictureTitle : ""} 
     #getName
     plantDictionary = getPlantName(plantName)
+    if not plantDictionary:
+        return None
 
     #Tempurature
     if plantDictionary[temperature]:
@@ -455,13 +468,25 @@ def getInformation(plantName):
         returnList[temperatureTitle] = getTemperatureInformation(plantDictionary)
 
     #ph
-    returnList[phTitle] = getPhInformation(plantDictionary) 
+    if plantDictionary[pH]:
+        returnList[phTitle] = plantDictionary[pH]
+    else:
+        returnList[phTitle] = getPhInformation(plantDictionary) 
+        plantDictionary[pH] = returnList[phTitle]
 
     #Moisture
-    returnList[moistureTitle] = getMoistureInformation(plantDictionary)
+    if plantDictionary[moisture]:
+        returnList[moistureTitle] = plantDictionary[moisture]
+    else:
+        returnList[moistureTitle] = getMoistureInformation(plantDictionary) 
+        plantDictionary[moisture] = returnList[moistureTitle]
 
     #sunlight
-    returnList[sunlightTitle] = getSunlightInformation(plantDictionary)
+    if plantDictionary[sunlight]:
+        returnList[sunlightTitle] = plantDictionary[sunlight]
+    else:
+        returnList[sunlightTitle] = getSunlightInformation(plantDictionary) 
+        plantDictionary[sunlight] = returnList[sunlightTitle]
 
     #picture
     #returnList[pictureTitle] = getPicture(plantDictionary[ChineseName])
@@ -482,9 +507,14 @@ if __name__ == "__main__":
     plantName = input("查詢的植物：")
     myDictionary = {ID : 0,
                     ChineseName : "",
-                    EnglishName : [],
-                    ScientificName : [],
-                    Order : []}
+                    EnglishName : [''],
+                    ScientificName : [''],
+                    Order : [''],
+                    pH : "",
+                    temperature : "",
+                    moisture : "",
+                    sunlight : "",
+                    picture : ""}
     if plantName == "":
         plantName = "百日草"
     print("搜尋：", plantName)
