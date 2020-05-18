@@ -1,6 +1,7 @@
 import flask
 app = flask.Flask(__name__)
 import main 
+import mymcs
 
 
 @app.route("/plant/<plantName>")
@@ -12,6 +13,12 @@ def getPlant(plantName):
 @app.route("/")
 def home():
     return "hello"
+
+
+@app.route("/rain")
+def getRain():
+    return mymcs.getRain()
+
 
 if __name__ == "__main__":
     app.debug = False 
